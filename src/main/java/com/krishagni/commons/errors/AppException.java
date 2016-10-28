@@ -115,6 +115,12 @@ public class AppException extends RuntimeException {
 		return new AppException(e);
 	}
 
+	public static <T> T raiseError(Throwable e) {
+		AppException ae = (e instanceof AppException) ? (AppException) e : serverError(e);
+		ae.checkAndThrow();
+		return null; // never comes here
+	}
+
 	private String getMessage(ParameterizedError error) {
 		return MessageUtil.getInstance().getMessage(error.error().code().toLowerCase(), error.params());
 	}

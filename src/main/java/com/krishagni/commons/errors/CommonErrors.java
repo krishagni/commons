@@ -5,6 +5,8 @@ public enum CommonErrors implements ErrorCode {
 
 	DB_CONSTRAINT_VIOLATION,
 
+	INVALID_STATUS,
+
 	FILE_NOT_FOUND;
 
 	@Override

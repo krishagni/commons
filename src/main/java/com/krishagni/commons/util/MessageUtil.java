@@ -3,8 +3,10 @@ package com.krishagni.commons.util;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.MessageSource;
 
+@Configurable
 public class MessageUtil {
 
 	private static MessageUtil instance = null;
