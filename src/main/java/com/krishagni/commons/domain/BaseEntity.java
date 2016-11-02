@@ -3,6 +3,8 @@ package com.krishagni.commons.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.proxy.HibernateProxyHelper;
+
 public class BaseEntity {
 	private Long id;
 
@@ -34,12 +36,13 @@ public class BaseEntity {
 			return true;
 		}
 
-		if (!(o instanceof BaseEntity)) {
+		if (o == null || getClass() != HibernateProxyHelper.getClassWithoutInitializingProxy(o)) {
 			return false;
 		}
 
+
 		BaseEntity that = (BaseEntity) o;
-		return getId() != null ? getId().equals(that.getId()) : that.getId() == null;
+		return getId() != null && getId().equals(that.getId());
 
 	}
 
