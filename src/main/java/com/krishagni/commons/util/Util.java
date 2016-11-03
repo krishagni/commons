@@ -38,7 +38,7 @@ public class Util {
 			while ((entry = zipIn.getNextEntry()) != null) {
 				String filePath = destDirPath + File.separator + entry.getName();
 				if (!entry.isDirectory()) {
-					inflateFile(zipIn, filePath);
+					copyToFile(zipIn, filePath);
 				} else {
 					new File(filePath).mkdirs();
 				}
@@ -52,10 +52,15 @@ public class Util {
 		}
 	}
 
-	private static void inflateFile(InputStream in, String filePath)
+	public static void copyToFile(InputStream in, String filePath)
 	throws IOException {
 		BufferedOutputStream bos = null;
 		try {
+			File file = new File(filePath);
+			if (file.getParentFile() != null && !file.getParentFile().exists()) {
+				file.getParentFile().mkdirs();
+			}
+
 			bos = new BufferedOutputStream(new FileOutputStream(filePath));
 			IOUtils.copy(in, bos);
 		} finally {
