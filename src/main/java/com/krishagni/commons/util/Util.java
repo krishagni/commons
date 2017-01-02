@@ -6,10 +6,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
+
+import com.krishagni.commons.io.CsvFileWriter;
+import com.krishagni.commons.io.CsvWriter;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class Util {
 	public static void unzip(String zipFilePath, String destDirPath) {
@@ -66,5 +74,53 @@ public class Util {
 		} finally {
 			IOUtils.closeQuietly(bos);
 		}
+	}
+
+	public static String stringListToCsv(Collection<String> elements) {
+		return stringListToCsv(elements.toArray(new String[0]), true);
+	}
+
+	public static String stringListToCsv(Collection<String> elements, boolean quotechar) {
+		return stringListToCsv(elements.toArray(new String[0]), quotechar);
+	}
+
+	public static String stringListToCsv(String[] elements) {
+		return stringListToCsv(elements, true);
+	}
+
+	public static String stringListToCsv(String[] elements, boolean quotechar) {
+		StringWriter writer = new StringWriter();
+		CsvWriter csvWriter = null;
+		try {
+			if (quotechar) {
+				csvWriter = CsvFileWriter.createCsvFileWriter(writer, CSVWriter.DEFAULT_SEPARATOR);
+			} else {
+				csvWriter = CsvFileWriter.createCsvFileWriter(writer, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
+			}
+
+			csvWriter.writeNext(elements);
+			csvWriter.flush();
+			return writer.toString();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} finally {
+			if (csvWriter != null) {
+				try {
+					csvWriter.close();
+				} catch (Exception e) {
+				}
+			}
+		}
+	}
+
+	public static boolean isValidDateFormat(String format) {
+		boolean isValid = true;
+		try {
+			new SimpleDateFormat(format);
+		} catch (IllegalArgumentException e) {
+			isValid = false;
+		}
+
+		return isValid;
 	}
 }
