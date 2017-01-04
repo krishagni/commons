@@ -5,10 +5,11 @@ import static groovy.io.FileType.FILES
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'maven'
 
 jar {
   baseName = 'krishagni-commons'
-  version =  '1.0.0'
+  version =  '4.0.0'
 }
 
 sourceCompatibility = 1.8
