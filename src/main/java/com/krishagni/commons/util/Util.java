@@ -12,7 +12,10 @@ import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javax.activation.FileTypeMap;
+
 import org.apache.commons.io.IOUtils;
+import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 
 import com.krishagni.commons.io.CsvFileWriter;
 import com.krishagni.commons.io.CsvWriter;
@@ -20,6 +23,8 @@ import com.krishagni.commons.io.CsvWriter;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class Util {
+	private static FileTypeMap fileTypesMap = null;
+
 	public static void unzip(String zipFilePath, String destDirPath) {
 		FileInputStream fin = null;
 		try {
@@ -122,5 +127,15 @@ public class Util {
 		}
 
 		return isValid;
+	}
+
+	public static String getFileContentType(String filename) {
+		if (fileTypesMap == null) {
+			synchronized (Util.class) {
+				fileTypesMap = new ConfigurableMimeFileTypeMap();
+			}
+		}
+
+		return fileTypesMap.getContentType(filename);
 	}
 }
