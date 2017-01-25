@@ -24,4 +24,14 @@ public interface IUser {
 	String getEmailAddress();
 
 	void setEmailAddress(String emailAddress);
+
+	String getDomainName();
+
+	boolean isLocked();
+
+	void lock();
+
+	boolean isPasswordExpired();
+
+	boolean isActive();
 }

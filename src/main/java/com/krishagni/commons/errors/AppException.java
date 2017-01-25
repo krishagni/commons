@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.JDBCException;
 
 import com.krishagni.commons.util.MessageUtil;
 
@@ -18,6 +18,8 @@ public class AppException extends RuntimeException {
 
 	private Throwable exception;
 
+	private Long exceptionId;
+
 	public AppException(ErrorType type, ErrorCode error, Object ... params) {
 		this.errorType = type;
 		errors.add(new ParameterizedError(error, params));
@@ -28,17 +30,29 @@ public class AppException extends RuntimeException {
 	}
 
 	public AppException(Throwable t) {
+		this(null, t);
+	}
+
+	public AppException(AppException other) {
+		errorType = other.getErrorType();
+		errors.addAll(other.getErrors());
+		exception = other.getException();
+		exceptionId = other.getExceptionId();
+	}
+
+	public AppException(Long exceptionId, Throwable t) {
+		this.exceptionId = exceptionId;
 		this.errorType = ErrorType.SYSTEM_ERROR;
 		this.exception = t;
 
-		if (t instanceof ConstraintViolationException) {
-			ConstraintViolationException cve = (ConstraintViolationException)t;
-			String dbMsg = cve.getConstraintName();
+		if (t instanceof JDBCException) {
+			JDBCException je = (JDBCException)t;
+			String dbMsg = je.getCause().getMessage();
 			if (StringUtils.isBlank(dbMsg)) {
-				dbMsg = cve.getSQLException().getMessage();
+				dbMsg = je.getSQLException().getMessage();
 			}
 
-			errors.add(new ParameterizedError(CommonErrors.DB_CONSTRAINT_VIOLATION, dbMsg));
+			errors.add(new ParameterizedError(CommonErrorCode.SQL_EXCEPTION, dbMsg));
 		}
 	}
 
@@ -58,6 +72,10 @@ public class AppException extends RuntimeException {
 		errors.add(new ParameterizedError(error, params));
 	}
 
+	public void addErrors(List<ParameterizedError> errors) {
+		this.errors.addAll(errors);
+	}
+
 	public boolean hasAnyErrors() {
 		return !this.errors.isEmpty() || exception != null;
 	}
@@ -69,14 +87,11 @@ public class AppException extends RuntimeException {
 	}
 
 	public boolean containsError(ErrorCode error) {
-		boolean containsError = false;
-		for (ParameterizedError parameterizedError : this.getErrors()) {
-			if (parameterizedError.error().equals(error)) {
-				containsError = true;
-				break;
-			}
+		if (CollectionUtils.isEmpty(errors)) {
+			return false;
 		}
-		return containsError;
+
+		return errors.stream().anyMatch(pe -> pe.error().equals(error));
 	}
 
 	public void rethrow(ErrorCode oldError, ErrorCode newError, Object ... params) {
@@ -103,6 +118,14 @@ public class AppException extends RuntimeException {
 		return errorMsg.toString();
 	}
 
+	public Long getExceptionId() {
+		return exceptionId;
+	}
+
+	public void setExceptionId(Long exceptionId) {
+		this.exceptionId = exceptionId;
+	}
+
 	public static AppException userError(ErrorCode error, Object ... params) {
 		return new AppException(ErrorType.USER_ERROR, error, params);
 	}
@@ -113,6 +136,10 @@ public class AppException extends RuntimeException {
 
 	public static AppException serverError(Throwable e) {
 		return new AppException(e);
+	}
+
+	public static AppException serverError(Long exceptionId, Throwable e) {
+		return new AppException(exceptionId, e);
 	}
 
 	public static <T> T raiseError(Throwable e) {
