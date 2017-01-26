@@ -7,7 +7,9 @@ public enum CommonErrorCode implements ErrorCode {
 
 	FILE_NOT_FOUND,
 
-	EXCEPTION_NOT_FOUND;
+	EXCEPTION_NOT_FOUND,
+
+	INVALID_STATUS;
 
 	@Override
 	public String code() {

@@ -1,6 +1,8 @@
 package com.krishagni.commons.domain;
 
-public interface IUser {
+import org.springframework.security.core.userdetails.UserDetails;
+
+public interface IUser extends UserDetails {
 	Long getId();
 
 	void setId(Long id);
